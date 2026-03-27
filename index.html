@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Parsawoo</title>
-  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@300;400;500&family=DM+Mono&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&display=swap" rel="stylesheet">
   <script src="data.js"></script>
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -14,12 +14,11 @@
       overflow: hidden;
       background: #080808;
       cursor: none;
+      font-family: 'Archivo', sans-serif;
     }
 
-    /* ── WebGL 캔버스 (배경 + 왜곡) ── */
     #glcanvas {
-      position: fixed;
-      inset: 0;
+      position: fixed; inset: 0;
       width: 100%; height: 100%;
       z-index: 0;
     }
@@ -35,98 +34,159 @@
       mix-blend-mode: difference;
     }
 
-    /* ── 상단 ── */
     #header {
       position: fixed;
-      top: 2rem;
-      left: 50%;
+      top: 2rem; left: 50%;
       transform: translateX(-50%);
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: .5rem;
+      gap: .45rem;
       z-index: 3;
       opacity: 0;
       animation: fadeIn .8s .3s forwards;
     }
 
     #datetime {
-      font-family: 'DM Mono', monospace;
+      font-family: 'Archivo', sans-serif;
+      font-weight: 500;
       font-size: 11px;
       letter-spacing: .2em;
       text-transform: uppercase;
-      color: rgba(255,255,255,0.5);
+      color: rgba(255,255,255,0.48);
       white-space: nowrap;
     }
 
     #credit {
-      font-family: 'DM Mono', monospace;
+      font-family: 'Archivo', sans-serif;
+      font-weight: 500;
       font-size: 10px;
       letter-spacing: .2em;
       text-transform: uppercase;
-      color: rgba(255,255,255,0.22);
+      color: rgba(255,255,255,0.2);
       white-space: nowrap;
     }
 
-     /* ── 하단 버튼 가로 배치 ── */
     #footer {
       position: fixed;
-      bottom: 3.5rem;
-      left: 50%;
+      bottom: 4rem; left: 50%;
       transform: translateX(-50%);
       display: flex;
       flex-direction: row;
       align-items: flex-end;
-      gap: 3.5rem;
+      gap: 6rem;
       z-index: 3;
       opacity: 0;
       animation: fadeIn .8s .6s forwards;
     }
 
-    .cookie-btn {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: .75rem;
-      text-decoration: none;
+    /* ── 쿠키 래퍼 ── */
+    .cookie-wrap {
+      position: relative;
+      width: 170px;
+      height: 180px;
       cursor: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
     }
 
-    .cookie-svg {
-      transition: transform .4s cubic-bezier(.23,1,.32,1),
-                  filter .4s;
+    /* 각도 비대칭 */
+    .cookie-wrap-primary  { transform: rotate(-14deg); }
+    .cookie-wrap-secondary { transform: rotate(9deg); }
+
+    /* ── 종이 ── */
+    .paper {
+      position: absolute;
+      bottom: 42px; left: 50%;
+      transform: translateX(-50%) scaleY(0) translateY(8px);
+      transform-origin: bottom center;
+      width: 116px;
+      background: #f7f2e0;
+      border-radius: 2px 2px 1px 1px;
+      padding: 12px 10px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 0;
+      box-shadow: 0 3px 16px rgba(0,0,0,0.4);
+      transition: transform .42s cubic-bezier(.23,1,.32,1) .06s,
+                  opacity .32s .06s;
+      opacity: 0;
     }
-    .cookie-btn:hover .cookie-svg {
-      transform: scale(1.07) rotate(-5deg);
-      filter: drop-shadow(0 0 22px rgba(255,255,255,0.15));
+    .paper::before {
+      content: '';
+      position: absolute;
+      top: 5px; left: 8px; right: 8px;
+      height: 1px;
+      background: rgba(160,140,100,0.3);
+    }
+    .paper::after {
+      content: '';
+      position: absolute;
+      top: 10px; left: 8px; right: 8px;
+      height: 1px;
+      background: rgba(160,140,100,0.18);
     }
 
-    .cookie-label {
-      font-family: 'DM Mono', monospace;
-      font-size: 10px;
-      letter-spacing: .24em;
+    .paper-text {
+      font-family: 'Archivo', sans-serif;
+      font-weight: 600;
+      font-size: 12px;
+      letter-spacing: .14em;
       text-transform: uppercase;
+      color: #2a2010;
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    /* ── 쿠키 SVG ── */
+    .cookie {
+      position: relative;
+      width: 155px;
+      height: 115px;
+      z-index: 1;
+    }
+
+    .half-left, .half-right {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+    }
+    .half-left  { transform-origin: right center; transition: transform .42s cubic-bezier(.23,1,.32,1); }
+    .half-right { transform-origin: left center;  transition: transform .42s cubic-bezier(.23,1,.32,1); }
+
+    .cookie-wrap:hover .half-left  { transform: translateX(-22px) rotate(-26deg) translateY(-4px); }
+    .cookie-wrap:hover .half-right { transform: translateX(22px)  rotate(26deg)  translateY(6px); }
+    .cookie-wrap:hover .paper      { transform: translateX(-50%) scaleY(1) translateY(0); opacity: 1; }
+
+    /* ── 부스러기 캔버스 ── */
+    .crumb-canvas {
+      position: absolute;
+      inset: -40px;
+      pointer-events: none;
+      z-index: 2;
+      width: calc(100% + 80px);
+      height: calc(100% + 80px);
+    }
+
+    /* 라벨 */
+    .cookie-label {
+      position: absolute;
+      bottom: -2rem; left: 50%;
+      transform: translateX(-50%);
+      font-family: 'Archivo', sans-serif;
+      font-weight: 500;
+      font-size: 10px;
+      letter-spacing: .22em;
+      text-transform: uppercase;
+      white-space: nowrap;
       transition: color .25s;
     }
-
-    /* primary (Weekly Letter) */
-    .cookie-btn-primary .cookie-body    { fill: rgba(255,255,255,0.9); transition: fill .25s; }
-    .cookie-btn-primary .cookie-shadow  { fill: rgba(0,0,0,0.12); }
-    .cookie-btn-primary .cookie-outline { fill: none; stroke: rgba(255,255,255,0.6); stroke-width: .8; }
-    .cookie-btn-primary .cookie-crease  { fill: none; stroke: rgba(0,0,0,0.22); stroke-width: 1.4; stroke-linecap: round; }
-    .cookie-btn-primary .cookie-label   { color: rgba(255,255,255,0.8); }
-    .cookie-btn-primary:hover .cookie-body  { fill: #fff; }
-    .cookie-btn-primary:hover .cookie-label { color: #fff; }
-
-    /* secondary (Hourly Report) */
-    .cookie-btn-secondary .cookie-body    { fill: rgba(255,255,255,0.06); transition: fill .25s; }
-    .cookie-btn-secondary .cookie-shadow  { fill: rgba(0,0,0,0.08); }
-    .cookie-btn-secondary .cookie-outline { fill: none; stroke: rgba(255,255,255,0.22); stroke-width: .8; }
-    .cookie-btn-secondary .cookie-crease  { fill: none; stroke: rgba(255,255,255,0.18); stroke-width: 1.2; stroke-linecap: round; }
-    .cookie-btn-secondary .cookie-label   { color: rgba(255,255,255,0.28); }
-    .cookie-btn-secondary:hover .cookie-body  { fill: rgba(255,255,255,0.13); }
-    .cookie-btn-secondary:hover .cookie-label { color: rgba(255,255,255,0.75); }
-    .cookie-btn-secondary:hover .cookie-outline { stroke: rgba(255,255,255,0.5); }
+    .cookie-wrap-primary   .cookie-label { color: rgba(255,255,255,0.5); }
+    .cookie-wrap-secondary .cookie-label { color: rgba(255,255,255,0.2); }
+    .cookie-wrap:hover     .cookie-label { color: rgba(255,255,255,0.85); }
 
     @keyframes fadeIn { to { opacity: 1; } }
   </style>
@@ -142,147 +202,217 @@
 </div>
 
 <div id="footer">
-  <a class="btn btn-primary" href="latest.html">Weekly Letter</a>
-  <a class="btn btn-secondary" href="hourly.html">Hourly Report</a>
+
+  <!-- Weekly Letter -->
+  <a class="cookie-wrap cookie-wrap-primary" href="latest.html" id="cookie-a">
+    <div class="paper"><span class="paper-text">Weekly<br>Letter</span></div>
+    <div class="cookie">
+      <svg class="half-left" viewBox="0 0 155 115" xmlns="http://www.w3.org/2000/svg">
+        <path d="M77 58 C66 50,28 43,14 60 C5 75,18 96,44 96 C59 96,71 83,77 72 Z"
+              fill="rgba(255,255,255,0.9)" stroke="rgba(255,255,255,0.45)" stroke-width="0.8"/>
+        <path d="M77 58 C66 50,28 43,14 60 C18 45,38 22,77 20"
+              fill="rgba(255,255,255,0.9)" stroke="rgba(255,255,255,0.45)" stroke-width="0.8"/>
+        <path d="M77 20 C75 37,74 53,77 72"
+              fill="none" stroke="rgba(0,0,0,0.2)" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      <svg class="half-right" viewBox="0 0 155 115" xmlns="http://www.w3.org/2000/svg">
+        <path d="M77 58 C88 50,126 43,140 60 C149 75,136 96,110 96 C95 96,83 83,77 72 Z"
+              fill="rgba(255,255,255,0.84)" stroke="rgba(255,255,255,0.45)" stroke-width="0.8"/>
+        <path d="M77 58 C88 50,126 43,140 60 C136 45,116 22,77 20"
+              fill="rgba(255,255,255,0.84)" stroke="rgba(255,255,255,0.45)" stroke-width="0.8"/>
+        <path d="M77 20 C79 37,80 53,77 72"
+              fill="none" stroke="rgba(0,0,0,0.2)" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <canvas class="crumb-canvas" id="crumb-a"></canvas>
+    <span class="cookie-label">Weekly Letter</span>
+  </a>
+
+  <!-- Hourly Report -->
+  <a class="cookie-wrap cookie-wrap-secondary" href="hourly.html" id="cookie-b">
+    <div class="paper"><span class="paper-text">Hourly<br>Report</span></div>
+    <div class="cookie">
+      <svg class="half-left" viewBox="0 0 155 115" xmlns="http://www.w3.org/2000/svg">
+        <path d="M77 58 C66 50,28 43,14 60 C5 75,18 96,44 96 C59 96,71 83,77 72 Z"
+              fill="rgba(255,255,255,0.11)" stroke="rgba(255,255,255,0.25)" stroke-width="0.8"/>
+        <path d="M77 58 C66 50,28 43,14 60 C18 45,38 22,77 20"
+              fill="rgba(255,255,255,0.11)" stroke="rgba(255,255,255,0.25)" stroke-width="0.8"/>
+        <path d="M77 20 C75 37,74 53,77 72"
+              fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.3" stroke-linecap="round"/>
+      </svg>
+      <svg class="half-right" viewBox="0 0 155 115" xmlns="http://www.w3.org/2000/svg">
+        <path d="M77 58 C88 50,126 43,140 60 C149 75,136 96,110 96 C95 96,83 83,77 72 Z"
+              fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.25)" stroke-width="0.8"/>
+        <path d="M77 58 C88 50,126 43,140 60 C136 45,116 22,77 20"
+              fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.25)" stroke-width="0.8"/>
+        <path d="M77 20 C79 37,80 53,77 72"
+              fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.3" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <canvas class="crumb-canvas" id="crumb-b"></canvas>
+    <span class="cookie-label">Hourly Report</span>
+  </a>
+
 </div>
 
 <script>
   /* ── 커서 ── */
-  let mx = window.innerWidth / 2;
-  let my = window.innerHeight / 2;
+  let mx = window.innerWidth/2, my = window.innerHeight/2;
   const cursorEl = document.getElementById('cursor');
   document.addEventListener('mousemove', e => {
     mx = e.clientX; my = e.clientY;
-    cursorEl.style.left = mx + 'px';
-    cursorEl.style.top  = my + 'px';
+    cursorEl.style.left = mx+'px'; cursorEl.style.top = my+'px';
   });
 
-  /* ── 시간 ── */
+  /* ── 시계 ── */
   const dtEl = document.getElementById('datetime');
   function updateTime() {
-    const now  = new Date();
-    const date = now.toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
-    const time = now.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
-    dtEl.textContent = `${date}  —  ${time}`;
+    const now = new Date();
+    dtEl.textContent =
+      now.toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'}) +
+      '  —  ' +
+      now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
   }
-  setInterval(updateTime, 1000);
-  updateTime();
+  setInterval(updateTime,1000); updateTime();
+
+  /* ── 부스러기 파티클 ── */
+  function initCrumbs(wrapEl, canvasEl, isPrimary) {
+    const W = canvasEl.width  = canvasEl.offsetWidth;
+    const H = canvasEl.height = canvasEl.offsetHeight;
+    const ctx = canvasEl.getContext('2d');
+    const cx = W/2, cy = H/2;
+    let particles = [];
+    let running = false;
+
+    function spawnCrumbs() {
+      particles = [];
+      const count = 28;
+      for (let i = 0; i < count; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = 1.8 + Math.random() * 4.5;
+        const size  = 1.5 + Math.random() * 4;
+        particles.push({
+          x: cx + (Math.random()-0.5)*60,
+          y: cy + (Math.random()-0.5)*30,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed - 1.5,
+          size,
+          alpha: 0.7 + Math.random()*0.3,
+          decay: 0.018 + Math.random()*0.022,
+          gravity: 0.12 + Math.random()*0.1,
+          color: isPrimary
+            ? `rgba(${220+Math.random()*35|0},${200+Math.random()*30|0},${160+Math.random()*30|0},`
+            : `rgba(${180+Math.random()*40|0},${170+Math.random()*30|0},${140+Math.random()*20|0},`,
+        });
+      }
+    }
+
+    function tick() {
+      ctx.clearRect(0,0,W,H);
+      let alive = false;
+      particles.forEach(p => {
+        if (p.alpha <= 0) return;
+        p.x  += p.vx;
+        p.y  += p.vy;
+        p.vy += p.gravity;
+        p.vx *= 0.97;
+        p.alpha -= p.decay;
+        if (p.alpha > 0) {
+          alive = true;
+          ctx.save();
+          ctx.globalAlpha = Math.max(0, p.alpha);
+          ctx.fillStyle = p.color + Math.max(0,p.alpha)+')';
+          ctx.beginPath();
+          ctx.ellipse(p.x, p.y, p.size, p.size*0.6,
+            Math.random()*Math.PI, 0, Math.PI*2);
+          ctx.fill();
+          ctx.restore();
+        }
+      });
+      if (alive) requestAnimationFrame(tick);
+      else running = false;
+    }
+
+    wrapEl.addEventListener('mouseenter', () => {
+      spawnCrumbs();
+      if (!running) { running = true; tick(); }
+    });
+  }
+
+  initCrumbs(document.getElementById('cookie-a'), document.getElementById('crumb-a'), true);
+  initCrumbs(document.getElementById('cookie-b'), document.getElementById('crumb-b'), false);
 
   /* ── WebGL ripple ── */
-  const canvas = document.getElementById('glcanvas');
-  const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+  const glCanvas = document.getElementById('glcanvas');
+  const gl = glCanvas.getContext('webgl') || glCanvas.getContext('experimental-webgl');
 
   function resize() {
-    canvas.width  = window.innerWidth;
-    canvas.height = window.innerHeight;
-    gl.viewport(0, 0, canvas.width, canvas.height);
+    glCanvas.width  = window.innerWidth;
+    glCanvas.height = window.innerHeight;
+    if (gl) gl.viewport(0,0,glCanvas.width,glCanvas.height);
   }
-  resize();
-  window.addEventListener('resize', resize);
+  resize(); window.addEventListener('resize', resize);
 
-  const vsSource = `
-    attribute vec2 a_pos;
-    varying vec2 v_uv;
-    void main() {
-      v_uv = a_pos * 0.5 + 0.5;
-      gl_Position = vec4(a_pos, 0.0, 1.0);
+  if (gl) {
+    const vs = `attribute vec2 a; varying vec2 v; void main(){ v=a*.5+.5; gl_Position=vec4(a,0,1); }`;
+    const fs = `precision mediump float;
+      uniform sampler2D u_tex; uniform vec2 u_res,u_mouse; uniform float u_time;
+      varying vec2 v;
+      void main(){
+        vec2 uv=v; uv.y=1.-uv.y;
+        vec2 m=vec2(u_mouse.x/u_res.x,1.-u_mouse.y/u_res.y);
+        float d=distance(uv,m);
+        float r=sin(d*28.-u_time*5.)*exp(-d*7.)*.018;
+        uv+=normalize(uv-m+vec2(.0001))*r;
+        gl_FragColor=texture2D(u_tex,uv);
+      }`;
+
+    function mkS(src,type){ const s=gl.createShader(type); gl.shaderSource(s,src); gl.compileShader(s); return s; }
+    const prog=gl.createProgram();
+    gl.attachShader(prog,mkS(vs,gl.VERTEX_SHADER));
+    gl.attachShader(prog,mkS(fs,gl.FRAGMENT_SHADER));
+    gl.linkProgram(prog); gl.useProgram(prog);
+
+    const buf=gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+    gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
+    const aP=gl.getAttribLocation(prog,'a');
+    gl.enableVertexAttribArray(aP);
+    gl.vertexAttribPointer(aP,2,gl.FLOAT,false,0,0);
+
+    const uTex=gl.getUniformLocation(prog,'u_tex');
+    const uRes=gl.getUniformLocation(prog,'u_res');
+    const uM=gl.getUniformLocation(prog,'u_mouse');
+    const uT=gl.getUniformLocation(prog,'u_time');
+
+    const tex=gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D,tex);
+    gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,1,1,0,gl.RGBA,gl.UNSIGNED_BYTE,new Uint8Array([10,10,10,255]));
+
+    if (typeof IMAGES!=='undefined' && IMAGES.length>0) {
+      const img=new Image(); img.crossOrigin='anonymous';
+      img.onload=()=>{
+        gl.bindTexture(gl.TEXTURE_2D,tex);
+        gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,img);
+        gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);
+      };
+      img.src=IMAGES[Math.floor(Math.random()*IMAGES.length)];
     }
-  `;
 
-  const fsSource = `
-    precision mediump float;
-    uniform sampler2D u_tex;
-    uniform vec2 u_res;
-    uniform vec2 u_mouse;
-    uniform float u_time;
-    varying vec2 v_uv;
-
-    void main() {
-      vec2 uv = v_uv;
-      uv.y = 1.0 - uv.y;
-
-      vec2 mouse = vec2(u_mouse.x / u_res.x, 1.0 - u_mouse.y / u_res.y);
-      float dist = distance(uv, mouse);
-
-      float ripple = sin(dist * 28.0 - u_time * 5.0)
-                     * exp(-dist * 7.0)
-                     * 0.018;
-
-      vec2 dir = normalize(uv - mouse + vec2(0.0001));
-      uv += dir * ripple;
-
-      gl_FragColor = texture2D(u_tex, uv);
+    let smx=mx,smy=my;
+    function draw(t){
+      smx+=(mx-smx)*.08; smy+=(my-smy)*.08;
+      gl.uniform2f(uRes,glCanvas.width,glCanvas.height);
+      gl.uniform2f(uM,smx,smy);
+      gl.uniform1f(uT,t*.001);
+      gl.uniform1i(uTex,0);
+      gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+      requestAnimationFrame(draw);
     }
-  `;
-
-  function compileShader(src, type) {
-    const s = gl.createShader(type);
-    gl.shaderSource(s, src);
-    gl.compileShader(s);
-    return s;
-  }
-
-  const prog = gl.createProgram();
-  gl.attachShader(prog, compileShader(vsSource, gl.VERTEX_SHADER));
-  gl.attachShader(prog, compileShader(fsSource, gl.FRAGMENT_SHADER));
-  gl.linkProgram(prog);
-  gl.useProgram(prog);
-
-  const quad = new Float32Array([-1,-1, 1,-1, -1,1, 1,1]);
-  const buf  = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-  gl.bufferData(gl.ARRAY_BUFFER, quad, gl.STATIC_DRAW);
-
-  const aPos = gl.getAttribLocation(prog, 'a_pos');
-  gl.enableVertexAttribArray(aPos);
-  gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
-
-  const uTex   = gl.getUniformLocation(prog, 'u_tex');
-  const uRes   = gl.getUniformLocation(prog, 'u_res');
-  const uMouse = gl.getUniformLocation(prog, 'u_mouse');
-  const uTime  = gl.getUniformLocation(prog, 'u_time');
-
-  /* 배경 텍스처 로드 */
-  const tex = gl.createTexture();
-  gl.bindTexture(gl.TEXTURE_2D, tex);
-
-  // 이미지 로드 전 임시 1px
-  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0,
-    gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([10,10,10,255]));
-
-  function loadBg() {
-    if (typeof IMAGES === 'undefined' || IMAGES.length === 0) return;
-    const src = IMAGES[Math.floor(Math.random() * IMAGES.length)];
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = () => {
-      gl.bindTexture(gl.TEXTURE_2D, tex);
-      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-    };
-    img.src = src;
-  }
-  loadBg();
-
-  /* 마우스 스무딩 */
-  let smx = mx, smy = my;
-
-  function draw(t) {
-    smx += (mx - smx) * 0.08;
-    smy += (my - smy) * 0.08;
-
-    gl.uniform2f(uRes,   canvas.width, canvas.height);
-    gl.uniform2f(uMouse, smx, smy);
-    gl.uniform1f(uTime,  t * 0.001);
-    gl.uniform1i(uTex,   0);
-
-    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     requestAnimationFrame(draw);
   }
-  requestAnimationFrame(draw);
 </script>
 </body>
 </html>
