@@ -38,40 +38,47 @@
       mix-blend-mode: difference;
     }
 
-   /* ── 상단 ── */
-#header {
-  position: fixed;
-  top: 2.5rem; /* 위치를 아주 조금 내림 */
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.3rem;
-  z-index: 3;
-  opacity: 0;
-  animation: fadeIn .8s .3s forwards;
-  mix-blend-mode: difference;
-}
+  /* ── 상단 ── */
+    #header {
+      position: fixed;
+      top: 2.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.3rem;
+      z-index: 3;
+      opacity: 0;
+      animation: fadeIn .8s .3s forwards;
+      
+      /* mix-blend-mode: difference; 를 삭제합니다. */
+    }
 
-#datetime {
-  font-family: 'Archivo', sans-serif;
-  font-size: 14px;      /* 크기 약간 키움 */
-  font-weight: 700;     /* 굵게 */
-  letter-spacing: -0.02em; /* 자간을 좁게 설정 */
-  color: rgba(255,255,255,0.9); /* 불투명도를 높여 더 선명하게 */
-  white-space: nowrap;
-}
+    /* 상단 텍스트 공통 그림자 적용 */
+    #datetime, #credit {
+      color: #fff; /* 폰트 색상은 순수 흰색 */
+      /* 짙은 검은색 그림자를 다중으로 겹쳐서 가독성 확보 */
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8),
+                   0 2px 4px rgba(0, 0, 0, 0.9),
+                   0 4px 8px rgba(0, 0, 0, 1);
+      white-space: nowrap;
+    }
 
-#credit {
-  font-family: 'Archivo', sans-serif;
-  font-size: 11px;
-  font-weight: 500;     /* Medium 두께 */
-  letter-spacing: -0.01em;
-  color: rgba(255,255,255,0.5);
-  white-space: nowrap;
-  /* text-transform: uppercase; 를 삭제하여 소문자 허용 */
-}
+    #datetime {
+      font-family: 'Archivo', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    #credit {
+      font-family: 'Archivo', sans-serif;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: -0.01em;
+      opacity: 0.6; /* 글자 자체 투명도 유지 */
+    }
 
     /* ── 하단 버튼 영역 ── */
     #footer {
@@ -86,50 +93,50 @@
       z-index: 3;
       opacity: 0;
       animation: fadeIn .8s .6s forwards;
-      mix-blend-mode: difference; /* 배경색에 따라 반전 (상단/커서와 동일) */
     }
 
     .btn {
       display: inline-block;
       text-decoration: none;
       cursor: none;
-      /* 부드러운 각도 복귀를 위한 트랜지션 */
       transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
     }
 
+    /* 버튼 텍스트 짙은 그림자 적용 */
     .btn span {
       display: block;
       font-family: 'Rubik Iso', system-ui;
-      font-size: 34px; /* 조금 더 시원하게 키움 */
+      font-size: 34px;
       letter-spacing: -0.08em;
-      color: #fff;
-      /* 기본 상태 그림자: 물 위에 떠 있는 입체감 */
-      text-shadow: 0 8px 15px rgba(0,0,0,0.6);
+      color: #fff; /* 폰트 색상은 순수 흰색 */
+      /* 상단보다 더 굵은 Rubik Iso 폰트에 맞춰그림자를 더 강하게 줌 */
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8),
+                   0 4px 8px rgba(0, 0, 0, 0.9),
+                   0 8px 16px rgba(0, 0, 0, 1),
+                   0 12px 24px rgba(0, 0, 0, 1);
       transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    /* ── Weekly Letter (하얀색 안개로 남음) ── */
+    /* ── Weekly Letter (하얀색 안개로 남음, 그림자는 사라짐) ── */
     .btn-primary {
       transform: rotate(-4deg);
     }
     .btn-primary:hover span {
-      /* 완전히 사라지지 않고 하얀 가우시안 블러 잔상으로 남음 */
-      opacity: 0.5; 
-      transform: scale(1.2) rotate(-6deg);
-      filter: blur(12px) brightness(2); /* 하얗게 번짐 */
-      text-shadow: 0 0 20px #fff; /* 하얀 광채 추가 */
+      opacity: 0.6; 
+      transform: scale(1.15) rotate(-6deg);
+      filter: blur(10px) brightness(2.5); /* 더 하얗게 번짐 */
+      text-shadow: 0 0 25px #fff; /* 호버 시에만 하얀 광채로 변경 */
     }
 
-    /* ── Hourly Report (검은색 안개로 남음) ── */
+    /* ── Hourly Report (검은색 안개로 남음, 그림자 사라짐) ── */
     .btn-secondary {
       transform: rotate(5deg);
     }
     .btn-secondary:hover span {
-      /* 완전히 사라지지 않고 검은 가우시안 블러 잔상으로 남음 */
-      opacity: 0.4;
-      transform: scale(1.2) rotate(8deg);
-      filter: blur(10px) brightness(0); /* 검게 타버린 잔상 */
-      text-shadow: none;
+      opacity: 0.5;
+      transform: scale(1.15) rotate(8deg);
+      filter: blur(8px) brightness(0); /* 검게 번짐 */
+      text-shadow: none; /* 호버 시 그림자 제거 */
     }
 
     /* 버튼 클릭 시 피드백 (선택 사항) */
