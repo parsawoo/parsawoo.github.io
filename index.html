@@ -68,55 +68,65 @@
       white-space: nowrap;
     }
 
-    /* ── 하단 버튼 ── */
+     /* ── 하단 버튼 가로 배치 ── */
     #footer {
       position: fixed;
-      bottom: 2.8rem;
+      bottom: 3.5rem;
       left: 50%;
       transform: translateX(-50%);
       display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: .9rem;
+      flex-direction: row;
+      align-items: flex-end;
+      gap: 3.5rem;
       z-index: 3;
       opacity: 0;
       animation: fadeIn .8s .6s forwards;
     }
 
-    .btn {
-      display: block;
-      width: 240px;
-      padding: 13px 0;
-      text-align: center;
-      font-family: 'DM Mono', monospace;
-      font-size: 11px;
-      letter-spacing: .28em;
-      text-transform: uppercase;
+    .cookie-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .75rem;
       text-decoration: none;
       cursor: none;
-      transition: color .25s, border-color .25s, background .25s;
     }
 
-    .btn-primary {
-      background: rgba(255,255,255,0.92);
-      color: #080808;
-      border: 1px solid transparent;
+    .cookie-svg {
+      transition: transform .4s cubic-bezier(.23,1,.32,1),
+                  filter .4s;
     }
-    .btn-primary:hover {
-      background: transparent;
-      color: rgba(255,255,255,0.9);
-      border-color: rgba(255,255,255,0.4);
+    .cookie-btn:hover .cookie-svg {
+      transform: scale(1.07) rotate(-5deg);
+      filter: drop-shadow(0 0 22px rgba(255,255,255,0.15));
     }
 
-    .btn-secondary {
-      background: transparent;
-      color: rgba(255,255,255,0.35);
-      border: 1px solid rgba(255,255,255,0.15);
+    .cookie-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: .24em;
+      text-transform: uppercase;
+      transition: color .25s;
     }
-    .btn-secondary:hover {
-      color: rgba(255,255,255,0.85);
-      border-color: rgba(255,255,255,0.45);
-    }
+
+    /* primary (Weekly Letter) */
+    .cookie-btn-primary .cookie-body    { fill: rgba(255,255,255,0.9); transition: fill .25s; }
+    .cookie-btn-primary .cookie-shadow  { fill: rgba(0,0,0,0.12); }
+    .cookie-btn-primary .cookie-outline { fill: none; stroke: rgba(255,255,255,0.6); stroke-width: .8; }
+    .cookie-btn-primary .cookie-crease  { fill: none; stroke: rgba(0,0,0,0.22); stroke-width: 1.4; stroke-linecap: round; }
+    .cookie-btn-primary .cookie-label   { color: rgba(255,255,255,0.8); }
+    .cookie-btn-primary:hover .cookie-body  { fill: #fff; }
+    .cookie-btn-primary:hover .cookie-label { color: #fff; }
+
+    /* secondary (Hourly Report) */
+    .cookie-btn-secondary .cookie-body    { fill: rgba(255,255,255,0.06); transition: fill .25s; }
+    .cookie-btn-secondary .cookie-shadow  { fill: rgba(0,0,0,0.08); }
+    .cookie-btn-secondary .cookie-outline { fill: none; stroke: rgba(255,255,255,0.22); stroke-width: .8; }
+    .cookie-btn-secondary .cookie-crease  { fill: none; stroke: rgba(255,255,255,0.18); stroke-width: 1.2; stroke-linecap: round; }
+    .cookie-btn-secondary .cookie-label   { color: rgba(255,255,255,0.28); }
+    .cookie-btn-secondary:hover .cookie-body  { fill: rgba(255,255,255,0.13); }
+    .cookie-btn-secondary:hover .cookie-label { color: rgba(255,255,255,0.75); }
+    .cookie-btn-secondary:hover .cookie-outline { stroke: rgba(255,255,255,0.5); }
 
     @keyframes fadeIn { to { opacity: 1; } }
   </style>
