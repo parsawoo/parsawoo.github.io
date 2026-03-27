@@ -22,9 +22,17 @@
       display: flex; flex-direction: column; align-items: center; gap: 0.3rem;
       z-index: 3; opacity: 0; animation: fadeIn .8s .3s forwards; text-align: center; width: 100%;
     }
+    /* ── 상단 텍스트 애니메이션 추가 ── */
     #datetime, #credit {
-      color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.8), 0 2px 4px rgba(0,0,0,0.9), 0 4px 8px rgba(0,0,0,1);
-      white-space: nowrap; font-family: 'Archivo', sans-serif;
+      color: #fff;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.8), 0 2px 4px rgba(0,0,0,0.9), 0 4px 8px rgba(0,0,0,1);
+      white-space: nowrap;
+      font-family: 'Archivo', sans-serif;
+      
+      /* 마우스 반응을 위한 설정 */
+      display: inline-block;
+      transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); /* 쫀득하게 돌아오는 느낌 */
+      pointer-events: none; /* 글자가 마우스 이벤트를 가리지 않게 함 */
     }
     #datetime { font-size: 14px; font-weight: 700; letter-spacing: -0.02em; }
     #credit { font-size: 11px; font-weight: 500; letter-spacing: -0.01em; opacity: 0.6; }
@@ -150,6 +158,33 @@
   }
   loadBg();
 
+  /* ── 상단 텍스트 도망가기 효과 로직 ── */
+  const headerItems = [dtEl, document.getElementById('credit')];
+  
+  function updateHeaderRepulsion() {
+    headerItems.forEach(item => {
+      const rect = item.getBoundingClientRect();
+      // 글자의 중심 좌표 계산
+      const itemX = rect.left + rect.width / 2;
+      const itemY = rect.top + rect.height / 2;
+      
+      const dx = mx - itemX;
+      const dy = my - itemY;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      
+      const radius = 150; // 마우스가 인식되는 거리
+      if (dist < radius) {
+        const force = (radius - dist) / radius;
+        // 마우스 반대 방향으로 밀어냄 (최대 30px, 20px)
+        const moveX = -(dx * force * 30) / dist;
+        const moveY = -(dy * force * 20) / dist;
+        item.style.transform = `translate(${moveX}px, ${moveY}px)`;
+      } else {
+        item.style.transform = `translate(0px, 0px)`;
+      }
+    });
+  }
+
   function render(t) {
     canvas.width = window.innerWidth; canvas.height = window.innerHeight;
     gl.viewport(0, 0, canvas.width, canvas.height);
@@ -159,6 +194,10 @@
     gl.uniform2f(uMouse, smx, smy);
     gl.uniform1f(uTime, t * 0.001);
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
+    // ── 매 프레임마다 글자 위치 업데이트 추가 ──
+    updateHeaderRepulsion();
+
     requestAnimationFrame(render);
   }
   requestAnimationFrame(render);
