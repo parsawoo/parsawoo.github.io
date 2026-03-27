@@ -38,7 +38,7 @@
       mix-blend-mode: difference;
     }
 
-  /* ── 상단 ── */
+/* ── 상단 (PC/모바일 공용 및 PC 확대) ── */
     #header {
       position: fixed;
       top: 2.5rem;
@@ -51,99 +51,81 @@
       z-index: 3;
       opacity: 0;
       animation: fadeIn .8s .3s forwards;
-      
-      /* mix-blend-mode: difference; 를 삭제합니다. */
+      text-align: center; /* 중앙 정렬 보장 */
+      width: 100%; /* 모바일 대응 */
     }
 
-    /* 상단 텍스트 공통 그림자 적용 */
     #datetime, #credit {
-      color: #fff; /* 폰트 색상은 순수 흰색 */
-      /* 짙은 검은색 그림자를 다중으로 겹쳐서 가독성 확보 */
-      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8),
-                   0 2px 4px rgba(0, 0, 0, 0.9),
-                   0 4px 8px rgba(0, 0, 0, 1);
+      color: #fff;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.8), 0 2px 4px rgba(0,0,0,0.9), 0 4px 8px rgba(0,0,0,1);
       white-space: nowrap;
     }
 
-    #datetime {
-      font-family: 'Archivo', sans-serif;
-      font-size: 14px;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-    }
-
-    #credit {
-      font-family: 'Archivo', sans-serif;
-      font-size: 11px;
-      font-weight: 500;
-      letter-spacing: -0.01em;
-      opacity: 0.6; /* 글자 자체 투명도 유지 */
-    }
+    /* 기본(모바일) 사이즈 */
+    #datetime { font-family: 'Archivo', sans-serif; font-size: 14px; font-weight: 700; letter-spacing: -0.02em; }
+    #credit { font-family: 'Archivo', sans-serif; font-size: 11px; font-weight: 500; letter-spacing: -0.01em; opacity: 0.6; }
 
     /* ── 하단 버튼 영역 ── */
     #footer {
       position: fixed;
-      bottom: 4.5rem;
+      bottom: 4rem;
       left: 50%;
       transform: translateX(-50%);
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 2.2rem;
+      gap: 1.5rem; /* 모바일에서 간격 최적화 */
       z-index: 3;
       opacity: 0;
       animation: fadeIn .8s .6s forwards;
+      width: 100%; /* 부모 너비 확보로 중앙 정렬 유지 */
     }
 
     .btn {
-      display: inline-block;
+      display: block;
       text-decoration: none;
       cursor: none;
       transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+      text-align: center;
+      width: 100%; /* 클릭 영역 확보 */
     }
 
-    /* 버튼 텍스트 짙은 그림자 적용 */
     .btn span {
-      display: block;
+      display: inline-block; /* 줄바꿈 방지 및 회전축 고정 */
       font-family: 'Rubik Iso', system-ui;
-      font-size: 34px;
-      letter-spacing: -0.08em;
-      color: #fff; /* 폰트 색상은 순수 흰색 */
-      /* 상단보다 더 굵은 Rubik Iso 폰트에 맞춰그림자를 더 강하게 줌 */
-      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8),
-                   0 4px 8px rgba(0, 0, 0, 0.9),
-                   0 8px 16px rgba(0, 0, 0, 1),
-                   0 12px 24px rgba(0, 0, 0, 1);
+      font-size: 8.5vw; /* 모바일에서 화면 너비에 맞춰 자동 조절 (줄바꿈 방지) */
+      max-size: 34px; /* 너무 커지지 않게 제한 */
+      letter-spacing: -0.06em;
+      color: #fff;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.8), 0 4px 8px rgba(0,0,0,0.9), 0 8px 16px rgba(0,0,0,1);
       transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      white-space: nowrap; /* 절대 줄바꿈 금지 */
     }
 
-    /* ── Weekly Letter (하얀색 안개로 남음, 그림자는 사라짐) ── */
-    .btn-primary {
-      transform: rotate(-4deg);
+    /* ── PC 환경 (데스크탑 1.5배 확대) ── */
+    @media (min-width: 768px) {
+      #datetime { font-size: 21px; } /* 14px * 1.5 */
+      #credit { font-size: 16px; }   /* 11px * 1.5 */
+      #header { gap: 0.5rem; }
+
+      #footer { gap: 3rem; bottom: 6rem; }
+      .btn span { font-size: 52px; } /* 34px * 1.5 */
     }
+
+    /* ── 애니메이션 및 호버 효과 유지 ── */
+    .btn-primary { transform: rotate(-4deg); }
     .btn-primary:hover span {
-      opacity: 0.6; 
-      transform: scale(1.15) rotate(-6deg);
-      filter: blur(10px) brightness(2.5); /* 더 하얗게 번짐 */
-      text-shadow: 0 0 25px #fff; /* 호버 시에만 하얀 광채로 변경 */
+      opacity: 0.6; transform: scale(1.1) rotate(-6deg);
+      filter: blur(12px) brightness(2.5); text-shadow: 0 0 25px #fff;
     }
 
-    /* ── Hourly Report (검은색 안개로 남음, 그림자 사라짐) ── */
-    .btn-secondary {
-      transform: rotate(5deg);
-    }
+    .btn-secondary { transform: rotate(5deg); }
     .btn-secondary:hover span {
-      opacity: 0.5;
-      transform: scale(1.15) rotate(8deg);
-      filter: blur(8px) brightness(0); /* 검게 번짐 */
-      text-shadow: none; /* 호버 시 그림자 제거 */
+      opacity: 0.5; transform: scale(1.1) rotate(8deg);
+      filter: blur(10px) brightness(0); text-shadow: none;
     }
 
-    /* 버튼 클릭 시 피드백 (선택 사항) */
-    .btn:active {
-      transform: scale(0.95);
-    }
-
+    .btn:active { transform: scale(0.95); }
     @keyframes fadeIn { to { opacity: 1; } }
   </style>
 </head>
