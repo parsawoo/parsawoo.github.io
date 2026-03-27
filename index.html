@@ -198,6 +198,7 @@
       vec2 mouse = vec2(u_mouse.x / u_res.x, u_mouse.y / u_res.y);
       float dist = distance(uv, mouse);
 
+      // 1. 물결 계산
       float ripple = sin(dist * 28.0 - u_time * 5.0)
                      * exp(-dist * 7.0)
                      * 0.018;
@@ -205,7 +206,18 @@
       vec2 dir = normalize(uv - mouse + vec2(0.0001));
       uv += dir * ripple;
 
-      gl_FragColor = texture2D(u_tex, uv);
+      // 2. 기본 색상 가져오기
+      vec4 texColor = texture2D(u_tex, uv);
+
+      // 3. 블리칭(하얗게 날아가는) 효과 추가
+      // 물결의 굴곡(ripple)이 심한 곳일수록 더 하얗게 만듭니다.
+      float bleach = abs(ripple) * 12.0; 
+      
+      // 마우스와 아주 가까운 곳에만 효과가 집중되도록 감쇄 적용
+      bleach *= exp(-dist * 10.0);
+
+      // 최종 색상 = 원래색 + 흰색 광도
+      gl_FragColor = vec4(texColor.rgb + vec3(bleach), texColor.a);
     }
   `;
 
