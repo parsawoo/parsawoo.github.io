@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Rubik+Iso&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700&family=Rubik+Iso&display=swap" rel="stylesheet">
   <script src="data.js"></script>
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -37,39 +38,40 @@
       mix-blend-mode: difference;
     }
 
-    /* ── 상단 ── */
-    #header {
-      position: fixed;
-      top: 2rem;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: .5rem;
-      z-index: 3;
-      opacity: 0;
-      animation: fadeIn .8s .3s forwards;
-      mix-blend-mode: difference;
-    }
+   /* ── 상단 ── */
+#header {
+  position: fixed;
+  top: 2.5rem; /* 위치를 아주 조금 내림 */
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  z-index: 3;
+  opacity: 0;
+  animation: fadeIn .8s .3s forwards;
+  mix-blend-mode: difference;
+}
 
-    #datetime {
-      font-family: 'Rubik Iso', system-ui;
-      font-size: 11px;
-      letter-spacing: .2em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.5);
-      white-space: nowrap;
-    }
+#datetime {
+  font-family: 'Archivo', sans-serif;
+  font-size: 14px;      /* 크기 약간 키움 */
+  font-weight: 700;     /* 굵게 */
+  letter-spacing: -0.02em; /* 자간을 좁게 설정 */
+  color: rgba(255,255,255,0.9); /* 불투명도를 높여 더 선명하게 */
+  white-space: nowrap;
+}
 
-    #credit {
-      font-family: 'Rubik Iso', system-ui;
-      font-size: 10px;
-      letter-spacing: .2em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.22);
-      white-space: nowrap;
-    }
+#credit {
+  font-family: 'Archivo', sans-serif;
+  font-size: 11px;
+  font-weight: 500;     /* Medium 두께 */
+  letter-spacing: -0.01em;
+  color: rgba(255,255,255,0.5);
+  white-space: nowrap;
+  /* text-transform: uppercase; 를 삭제하여 소문자 허용 */
+}
 
     /* ── 하단 버튼 ── */
     #footer {
