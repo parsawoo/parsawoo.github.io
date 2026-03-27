@@ -158,13 +158,12 @@
   }
   loadBg();
 
-  /* ── 상단 텍스트 도망가기 효과 로직 ── */
+ /* ── 상단 텍스트 "확!" 도망가기 효과 ── */
   const headerItems = [dtEl, document.getElementById('credit')];
   
   function updateHeaderRepulsion() {
     headerItems.forEach(item => {
       const rect = item.getBoundingClientRect();
-      // 글자의 중심 좌표 계산
       const itemX = rect.left + rect.width / 2;
       const itemY = rect.top + rect.height / 2;
       
@@ -172,15 +171,19 @@
       const dy = my - itemY;
       const dist = Math.sqrt(dx * dx + dy * dy);
       
-      const radius = 150; // 마우스가 인식되는 거리
+      const radius = 250; // 더 넓은 범위에서 감지
       if (dist < radius) {
-        const force = (radius - dist) / radius;
-        // 마우스 반대 방향으로 밀어냄 (최대 30px, 20px)
-        const moveX = -(dx * force * 30) / dist;
-        const moveY = -(dy * force * 20) / dist;
-        item.style.transform = `translate(${moveX}px, ${moveY}px)`;
+        // 거리가 가까울수록 기하급수적으로 힘이 강해짐
+        let force = (radius - dist) / radius;
+        force = Math.pow(force, 1.5); // 가속도 추가
+        
+        // 최대 120px까지 확! 밀려나게 설정
+        const moveX = -(dx * force * 120) / dist;
+        const moveY = -(dy * force * 80) / dist;
+        
+        item.style.transform = `translate(${moveX}px, ${moveY}px) scale(${1 - force * 0.2})`;
       } else {
-        item.style.transform = `translate(0px, 0px)`;
+        item.style.transform = `translate(0px, 0px) scale(1)`;
       }
     });
   }
@@ -195,7 +198,7 @@
     gl.uniform1f(uTime, t * 0.001);
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 
-    // ── 매 프레임마다 글자 위치 업데이트 추가 ──
+    // ── 실시간 반발력 업데이트 ──
     updateHeaderRepulsion();
 
     requestAnimationFrame(render);
