@@ -4,9 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Parsawoo</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,100..900;1,100..900&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@300;400;500&family=DM+Mono&display=swap" rel="stylesheet">
   <script src="data.js"></script>
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -14,32 +12,22 @@
     html, body {
       width: 100%; height: 100%;
       overflow: hidden;
-      background: #0a0a0a;
+      background: #080808;
       cursor: none;
-      font-family: 'DM Mono', monospace;
-      color: #f0ede6;
     }
 
-    #bg {
+    /* ── WebGL 캔버스 (배경 + 왜곡) ── */
+    #glcanvas {
       position: fixed;
       inset: 0;
-      background-size: cover;
-      background-position: center;
-      filter: brightness(0.5) saturate(0.75);
+      width: 100%; height: 100%;
       z-index: 0;
-    }
-
-    #spotlight {
-      position: fixed;
-      inset: 0;
-      z-index: 1;
-      pointer-events: none;
     }
 
     #cursor {
       position: fixed;
-      width: 7px; height: 7px;
-      background: #f0ede6;
+      width: 6px; height: 6px;
+      background: #fff;
       border-radius: 50%;
       transform: translate(-50%, -50%);
       pointer-events: none;
@@ -47,86 +35,87 @@
       mix-blend-mode: difference;
     }
 
-    /* ── 상단 날짜/시간 ── */
-    #datetime {
+    /* ── 상단 ── */
+    #header {
       position: fixed;
       top: 2rem;
       left: 50%;
       transform: translateX(-50%);
-      font-size: 11px;
-      letter-spacing: .2em;
-      text-transform: uppercase;
-      color: rgba(240,237,230,0.5);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .5rem;
       z-index: 3;
-      white-space: nowrap;
       opacity: 0;
       animation: fadeIn .8s .3s forwards;
     }
 
-    /* ── 중앙 버튼 두 개 ── */
-    .scene {
+    #datetime {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.5);
+      white-space: nowrap;
+    }
+
+    #credit {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.22);
+      white-space: nowrap;
+    }
+
+    /* ── 하단 버튼 ── */
+    #footer {
       position: fixed;
-      inset: 0;
-      z-index: 2;
+      bottom: 2.8rem;
+      left: 50%;
+      transform: translateX(-50%);
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      gap: 1rem;
+      gap: .9rem;
+      z-index: 3;
+      opacity: 0;
+      animation: fadeIn .8s .6s forwards;
     }
 
     .btn {
       display: block;
-      width: 220px;
-      padding: 14px 0;
+      width: 240px;
+      padding: 13px 0;
       text-align: center;
       font-family: 'DM Mono', monospace;
-      font-size: 12px;
-      letter-spacing: .25em;
+      font-size: 11px;
+      letter-spacing: .28em;
       text-transform: uppercase;
       text-decoration: none;
       cursor: none;
-      transition: color .2s, border-color .2s, background .2s;
-      opacity: 0;
-      animation: fadeIn .8s forwards;
+      transition: color .25s, border-color .25s, background .25s;
     }
 
-    .btn-latest {
-      background: #f0ede6;
-      color: #0a0a0a;
-      border: 1px solid #f0ede6;
-      animation-delay: .5s;
+    .btn-primary {
+      background: rgba(255,255,255,0.92);
+      color: #080808;
+      border: 1px solid transparent;
     }
-    .btn-latest:hover {
+    .btn-primary:hover {
       background: transparent;
-      color: #f0ede6;
+      color: rgba(255,255,255,0.9);
+      border-color: rgba(255,255,255,0.4);
     }
 
-    .btn-old {
+    .btn-secondary {
       background: transparent;
-      color: rgba(240,237,230,0.45);
-      border: 1px solid rgba(240,237,230,0.2);
-      animation-delay: .65s;
+      color: rgba(255,255,255,0.35);
+      border: 1px solid rgba(255,255,255,0.15);
     }
-    .btn-old:hover {
-      color: #f0ede6;
-      border-color: rgba(240,237,230,0.6);
-    }
-
-    /* ── 하단 ── */
-    #credit {
-      position: fixed;
-      bottom: 2rem;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 10px;
-      letter-spacing: .2em;
-      text-transform: uppercase;
-      color: rgba(240,237,230,0.25);
-      z-index: 3;
-      white-space: nowrap;
-      opacity: 0;
-      animation: fadeIn .8s .9s forwards;
+    .btn-secondary:hover {
+      color: rgba(255,255,255,0.85);
+      border-color: rgba(255,255,255,0.45);
     }
 
     @keyframes fadeIn { to { opacity: 1; } }
@@ -134,69 +123,156 @@
 </head>
 <body>
 
-<div id="bg"></div>
-<canvas id="spotlight"></canvas>
+<canvas id="glcanvas"></canvas>
 <div id="cursor"></div>
 
-<div id="datetime"></div>
-
-<div class="scene">
-  <a class="btn btn-latest" href="latest.html">Latest</a>
-  <a class="btn btn-old" href="archive.html">Old</a>
+<div id="header">
+  <div id="datetime"></div>
+  <div id="credit">Curated by Parsawoo</div>
 </div>
 
-<div id="credit">Curated by Parsawoo</div>
+<div id="footer">
+  <a class="btn btn-primary" href="latest.html">Weekly Letter</a>
+  <a class="btn btn-secondary" href="hourly.html">Hourly Report</a>
+</div>
 
 <script>
-  let mx = -999, my = -999;
-
-  const bgEl     = document.getElementById('bg');
-  const canvas   = document.getElementById('spotlight');
-  const ctx      = canvas.getContext('2d');
+  /* ── 커서 ── */
+  let mx = window.innerWidth / 2;
+  let my = window.innerHeight / 2;
   const cursorEl = document.getElementById('cursor');
-  const dtEl     = document.getElementById('datetime');
-
-  function resize() {
-    canvas.width  = window.innerWidth;
-    canvas.height = window.innerHeight;
-  }
-  resize();
-  window.addEventListener('resize', resize);
-
   document.addEventListener('mousemove', e => {
     mx = e.clientX; my = e.clientY;
     cursorEl.style.left = mx + 'px';
     cursorEl.style.top  = my + 'px';
   });
 
-  function drawSpotlight() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    const g = ctx.createRadialGradient(mx, my, 0, mx, my, 360);
-    g.addColorStop(0,    'rgba(5,5,5,0)');
-    g.addColorStop(0.28, 'rgba(5,5,5,0)');
-    g.addColorStop(0.62, 'rgba(5,5,5,0.75)');
-    g.addColorStop(1,    'rgba(5,5,5,0.97)');
-    ctx.fillStyle = g;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    requestAnimationFrame(drawSpotlight);
-  }
-  drawSpotlight();
-
-  // 랜덤 배경
-  if (typeof IMAGES !== 'undefined' && IMAGES.length > 0) {
-    const pick = IMAGES[Math.floor(Math.random() * IMAGES.length)];
-    bgEl.style.backgroundImage = `url('${pick}')`;
-  }
-
-  // 날짜 + 시간
+  /* ── 시간 ── */
+  const dtEl = document.getElementById('datetime');
   function updateTime() {
     const now  = new Date();
-    const date = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-    const time = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    const date = now.toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+    const time = now.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
     dtEl.textContent = `${date}  —  ${time}`;
   }
   setInterval(updateTime, 1000);
   updateTime();
+
+  /* ── WebGL ripple ── */
+  const canvas = document.getElementById('glcanvas');
+  const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+
+  function resize() {
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+    gl.viewport(0, 0, canvas.width, canvas.height);
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const vsSource = `
+    attribute vec2 a_pos;
+    varying vec2 v_uv;
+    void main() {
+      v_uv = a_pos * 0.5 + 0.5;
+      gl_Position = vec4(a_pos, 0.0, 1.0);
+    }
+  `;
+
+  const fsSource = `
+    precision mediump float;
+    uniform sampler2D u_tex;
+    uniform vec2 u_res;
+    uniform vec2 u_mouse;
+    uniform float u_time;
+    varying vec2 v_uv;
+
+    void main() {
+      vec2 uv = v_uv;
+      uv.y = 1.0 - uv.y;
+
+      vec2 mouse = vec2(u_mouse.x / u_res.x, 1.0 - u_mouse.y / u_res.y);
+      float dist = distance(uv, mouse);
+
+      float ripple = sin(dist * 28.0 - u_time * 5.0)
+                     * exp(-dist * 7.0)
+                     * 0.018;
+
+      vec2 dir = normalize(uv - mouse + vec2(0.0001));
+      uv += dir * ripple;
+
+      gl_FragColor = texture2D(u_tex, uv);
+    }
+  `;
+
+  function compileShader(src, type) {
+    const s = gl.createShader(type);
+    gl.shaderSource(s, src);
+    gl.compileShader(s);
+    return s;
+  }
+
+  const prog = gl.createProgram();
+  gl.attachShader(prog, compileShader(vsSource, gl.VERTEX_SHADER));
+  gl.attachShader(prog, compileShader(fsSource, gl.FRAGMENT_SHADER));
+  gl.linkProgram(prog);
+  gl.useProgram(prog);
+
+  const quad = new Float32Array([-1,-1, 1,-1, -1,1, 1,1]);
+  const buf  = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, quad, gl.STATIC_DRAW);
+
+  const aPos = gl.getAttribLocation(prog, 'a_pos');
+  gl.enableVertexAttribArray(aPos);
+  gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+
+  const uTex   = gl.getUniformLocation(prog, 'u_tex');
+  const uRes   = gl.getUniformLocation(prog, 'u_res');
+  const uMouse = gl.getUniformLocation(prog, 'u_mouse');
+  const uTime  = gl.getUniformLocation(prog, 'u_time');
+
+  /* 배경 텍스처 로드 */
+  const tex = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, tex);
+
+  // 이미지 로드 전 임시 1px
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0,
+    gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([10,10,10,255]));
+
+  function loadBg() {
+    if (typeof IMAGES === 'undefined' || IMAGES.length === 0) return;
+    const src = IMAGES[Math.floor(Math.random() * IMAGES.length)];
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      gl.bindTexture(gl.TEXTURE_2D, tex);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    };
+    img.src = src;
+  }
+  loadBg();
+
+  /* 마우스 스무딩 */
+  let smx = mx, smy = my;
+
+  function draw(t) {
+    smx += (mx - smx) * 0.08;
+    smy += (my - smy) * 0.08;
+
+    gl.uniform2f(uRes,   canvas.width, canvas.height);
+    gl.uniform2f(uMouse, smx, smy);
+    gl.uniform1f(uTime,  t * 0.001);
+    gl.uniform1i(uTex,   0);
+
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    requestAnimationFrame(draw);
+  }
+  requestAnimationFrame(draw);
 </script>
 </body>
 </html>
