@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Weekly Letter | A2O Future Strategy</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body class="dark-mode"> <nav>
+        <a href="index.html">← Back to Home</a>
+    </nav>
+
+    <main id="content" class="weekly-content">
+        <p>Loading Weekly Scanning Report...</p>
+    </main>
+
+    <script>
+        // URL에서 파일명을 가져오거나 최신 파일을 로드하는 로직
+        const fileName = '2026-03-30.md'; // 우선은 고정, 나중에 자동화 가능
+        fetch(`./weekly-letter/${fileName}`)
+            .then(response => response.text())
+            .then(text => {
+                document.getElementById('content').innerHTML = marked.parse(text);
+            })
+            .catch(err => {
+                document.getElementById('content').innerHTML = "<p>리포트를 불러오는 데 실패했습니다.</p>";
+            });
+    </script>
+</body>
+</html>
