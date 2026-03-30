@@ -19,39 +19,38 @@
 
     #glcanvas { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; }
     
-    /* [복구] 상하단 가시성 확보를 위한 그라데이션 그림자 레이어 */
-    body::before { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 30%; background: linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, transparent 100%); z-index: 1; pointer-events: none; }
-    body::after { content: ''; position: fixed; bottom: 0; left: 0; width: 100%; height: 35%; background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 100%); z-index: 1; pointer-events: none; }
-
+    /* PC 커서 볼 (팝업 위에서도 항상 보이도록 z-index 최상위 유지) */
     #cursor { 
       position: fixed; width: 12px; height: 12px; background: #fff; border-radius: 50%; 
       transform: translate(-50%, -50%); pointer-events: none; z-index: 99999; 
-      mix-blend-mode: difference; transition: opacity 0.3s ease;
+      mix-blend-mode: difference; display: block;
     }
 
+    /* 모바일(터치 기기)에서만 커서 제거 */
     @media (hover: none) and (pointer: coarse) {
       #cursor { display: none !important; }
       html, body { cursor: auto; }
     }
 
-    /* 2. 메인 UI (움직이는 헤더 복구) */
+    /* 2. 메인 UI */
     #header { 
       position: fixed; top: 2rem; left: 50%; transform: translateX(-50%); 
       display: flex; flex-direction: column; align-items: center; gap: 0.3rem; 
       z-index: 3; opacity: 0; animation: fadeIn .8s .3s forwards; text-align: center; width: 100%; 
+      pointer-events: none; /* 마우스 이벤트 방해 금지 */
     }
-    /* [복구] 마우스 따라 움직이는 텍스트 효과 */
+    
     #datetime, #credit { 
       color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.8); white-space: nowrap; 
       font-family: 'Archivo', sans-serif; display: inline-block; 
-      transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); pointer-events: none; 
+      transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
     }
     #datetime { font-size: 13px; font-weight: 700; }
     #credit { font-size: 10px; opacity: 0.6; }
 
     #footer { position: fixed; bottom: 3.5rem; left: 0; right: 0; display: flex; flex-direction: column; align-items: center; gap: 1.2rem; z-index: 3; opacity: 0; animation: fadeIn .8s .6s forwards; }
     
-    /* [복구] 삐딱한 버튼 및 호버 블러/글로우 효과 */
+    /* 버튼 원래 폰트 및 디자인 (기울기 + 글로우 복구) */
     .btn { text-decoration: none; cursor: none; transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); width: 100%; text-align: center; }
     .btn span { display: inline-block; font-family: 'Rubik Iso', system-ui; font-size: 8.5vw; letter-spacing: -0.06em; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.8); transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
     
@@ -64,7 +63,7 @@
     @media (min-width: 768px) { #datetime { font-size: 21px; } #credit { font-size: 16px; } #footer { gap: 3rem; bottom: 6rem; } .btn span { font-size: 52px; } }
     @keyframes fadeIn { to { opacity: 1; } }
 
-    /* 3. 클래식 맥 팝업 */
+    /* 3. 클래식 맥 팝업 (여백 문제 해결본 유지) */
     .popup-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(5px); z-index: 10000; display: flex; justify-content: center; align-items: center; opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 0.4s ease; }
     .popup-overlay.active { opacity: 1; visibility: visible; pointer-events: auto; }
 
@@ -79,12 +78,15 @@
     .mac-note-body { flex: 1; overflow-y: auto; padding: 25px; color: #000; text-align: left; line-height: 1.6; font-family: 'Courier New', Courier, monospace; -webkit-overflow-scrolling: touch; }
     @media (min-width: 768px) { .mac-note-body { padding: 45px; } }
 
-    /* 리스트 스타일 교정 */
+    /* 불렛 포인트 여백 넘어가는 이슈 픽스 */
     .mac-note-body ul, .mac-note-body ol { margin-left: 25px !important; margin-bottom: 15px; padding-left: 5px; }
     .mac-note-body li { font-size: 13.5px; margin-bottom: 8px; list-style-position: outside; }
     .mac-note-body h1 { font-size: 1.2rem; background: #000; color: #fff; padding: 8px; margin-bottom: 20px; display: inline-block; border: 2px solid #000; }
     .mac-note-body h2 { font-size: 1.1rem; margin-top: 25px; border-bottom: 2.5px solid #000; padding-bottom: 5px; margin-bottom: 15px; }
-    
+    .mac-note-body table { width: 100%; border-collapse: collapse; margin: 20px 0; border: 2px solid #000; font-size: 12px; }
+    .mac-note-body th, .mac-note-body td { border: 1px solid #000; padding: 8px 6px; text-align: left; }
+    .mac-note-body th { background: #eee; }
+
     .mac-note-footer { padding: 10px 15px; background: #fff; border-top: 1px solid #ddd; font-size: 9px; color: #000; text-align: right; font-family: 'Courier New', Courier, monospace; font-weight: bold; }
   </style>
 </head>
@@ -126,11 +128,11 @@
     mx = e.clientX; my = e.clientY; 
     if (cursorEl) { cursorEl.style.left = mx+'px'; cursorEl.style.top = my+'px'; }
     
-    // [복구] 헤더 텍스트 마우스 반응 효과
-    const moveX = (e.clientX - window.innerWidth / 2) / 30;
-    const moveY = (e.clientY - window.innerHeight / 2) / 30;
+    // [핵심 복구] 마우스가 오면 반대로 '도망가는' 텍스트 효과 (음수 좌표 계산)
+    const moveX = (window.innerWidth / 2 - e.clientX) / 25;
+    const moveY = (window.innerHeight / 2 - e.clientY) / 25;
     dtEl.style.transform = `translate(${moveX}px, ${moveY}px)`;
-    creditEl.style.transform = `translate(${moveX * 0.8}px, ${moveY * 0.8}px)`;
+    creditEl.style.transform = `translate(${moveX * 1.5}px, ${moveY * 1.5}px)`;
   });
   
   function updateTime() { const now = new Date(); dtEl.textContent = now.toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' }) + ' — ' + now.toLocaleTimeString('en-US', { hour12:false }); }
@@ -157,16 +159,21 @@
 
   weeklyBtn.addEventListener('click', (e) => {
     e.preventDefault();
-    fetch('weekly-letter/2026-03-30.md').then(res => res.text()).then(data => {
+    fetch('weekly-letter/2026-03-30.md').then(res => {
+      if (!res.ok) throw new Error(); return res.text();
+    }).then(data => {
       content.innerHTML = (typeof marked !== 'undefined') ? marked.parse(data) : data;
       popup.classList.add('active');
-      if (window.innerWidth >= 768) cursorEl.style.opacity = '0';
+      // PC 커서를 없애는 로직을 완전히 삭제했습니다. (PC에서는 무조건 보임)
+    }).catch(err => {
+      content.innerHTML = `<div style="color:red; font-size:11px; padding:20px;">[ERROR]: 데이터 로드 실패</div>`;
+      popup.classList.add('active');
     });
   });
 
   closeBtn.addEventListener('click', () => { 
     popup.classList.remove('active');
-    if (window.innerWidth >= 768) cursorEl.style.opacity = '1';
+    // 커서 상태 복구 로직도 불필요하여 삭제했습니다.
   });
 
   function render(t) {
