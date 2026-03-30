@@ -6,21 +6,218 @@
     <title>Weekly Letter | A2O Future Strategy</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
+    <style>
+        /* 1. 클래식 매킨토시 감성 노트 팝업 전용 스타일 (인라인 CSS) */
+        
+        /* 팝업창을 감싸는 마스크 (어두운 배경) */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7); /* 어두운 배경 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0; /* 초기 상태: 투명 */
+            visibility: hidden; /* 초기 상태: 숨김 */
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+            z-index: 1000; /* 최상위에 위치 */
+        }
+
+        /* 팝업창 활성화 상태 */
+        .popup-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* 클래식 맥 감성 노트 팝업창 */
+        .mac-note-popup {
+            background-color: #fff; /* 밝은 배경 (클래식 맥 감성) */
+            border: 2px solid #000; /* 검은색 테두리 */
+            border-radius: 8px; /* 약간의 둥근 모서리 */
+            box-shadow: 10px 10px 0 #000; /* 그림자 효과 (픽셀 느낌) */
+            width: 90%;
+            max-width: 700px;
+            height: 80vh; /* 화면 높이의 80% */
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; /* 내부 스크롤바 제어 */
+            
+            /* 애니메이션 효과 (밑에서 스으윽) */
+            transform: translateY(100px); /* 초기 상태: 아래로 이동 */
+            transition: transform 0.5s ease;
+        }
+
+        /* 팝업창 활성화 상태 애니메이션 */
+        .popup-overlay.active .mac-note-popup {
+            transform: translateY(0); /* 활성화 시 중앙 위치 */
+        }
+
+        /* 노트 팝업 상단 바 (클래식 맥 스타일) */
+        .mac-note-header {
+            background-color: #fff;
+            border-bottom: 2px solid #000;
+            padding: 10px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: default; /* 드래그 불가 표시 */
+        }
+
+        /* 상단 바 제목 (클래식 타이포그래피 느낌) */
+        .mac-note-title {
+            color: #000;
+            font-family: 'Courier New', Courier, monospace; /* 모노스페이스 폰트 */
+            font-weight: bold;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+        }
+
+        /* 닫기 버튼 (픽셀 아트 느낌) */
+        .mac-note-close {
+            background: none;
+            border: 2px solid #000;
+            color: #000;
+            font-weight: bold;
+            font-size: 1.2rem;
+            cursor: pointer;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 4px;
+        }
+
+        /* 닫기 버튼 호버 효과 */
+        .mac-note-close:hover {
+            background-color: #000;
+            color: #fff;
+        }
+
+        /* 노트 팝업 내용 영역 (스크롤 가능) */
+        .mac-note-body {
+            flex-grow: 1; /* 남은 공간 모두 차지 */
+            overflow-y: auto; /* 세로 스크롤바 */
+            padding: 30px;
+            color: #000; /* 검은색 글자색 (가독성 확보) */
+            font-family: 'Pretendard', sans-serif; /* 기본 Pretendard 폰트 유지 */
+            line-height: 1.6;
+        }
+
+        /* 노트 내부 마크다운 요소 스타일링 (A2O 네온 포인트 활용) */
+        .mac-note-body h1 { color: #000; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 25px; }
+        .mac-note-body h2 { color: #000; margin-top: 30px; }
+        .mac-note-body table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 0.9rem; }
+        .mac-note-body th, .mac-note-body td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        .mac-note-body th { background-color: #f5f5f5; color: #000; font-weight: bold; }
+        
+        /* 표 내부 하이퍼링크 스타일 (A2O 네온 그린 포인트) */
+        .mac-note-body table a {
+            color: #0066cc; /* 클래식한 링크 색상 */
+            text-decoration: none;
+            border-bottom: 1px dashed #0066cc;
+            transition: color 0.3s ease, border-bottom 0.3s ease;
+        }
+        
+        .mac-note-body table a:hover {
+            color: #003399; /* 호버 시 어두운 링크 색상 */
+            border-bottom: 1px solid #003399;
+        }
+        
+        /* 인용구 스타일 */
+        .mac-note-body blockquote {
+            border-left: 4px solid #00ffcc; /* A2O 네온 포인트 */
+            padding-left: 20px;
+            margin: 20px 0;
+            color: #555;
+            font-style: italic;
+        }
+
+        /* 스크롤바 스타일 (클래식 맥 느낌) */
+        .mac-note-body::-webkit-scrollbar { width: 10px; }
+        .mac-note-body::-webkit-scrollbar-track { background: #f1f1f1; }
+        .mac-note-body::-webkit-scrollbar-thumb { background: #ddd; border-radius: 5px; }
+        .mac-note-body::-webkit-scrollbar-thumb:hover { background: #ccc; }
+
+        /* 하단 바 (클래식 맥 느낌) */
+        .mac-note-footer {
+            background-color: #fff;
+            border-top: 2px solid #000;
+            padding: 10px 15px;
+            text-align: right;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.8rem;
+            color: #888;
+        }
+    </style>
 </head>
 <body class="dark-mode"> <nav style="padding: 20px;">
         <a href="index.html" style="color: #00ffcc; text-decoration: none;">← Back to Home</a>
     </nav>
 
-    <main id="content" class="weekly-content" style="max-width: 800px; margin: 0 auto; padding: 40px 20px; color: #fff;">
-        <div id="loading">리포트를 불러오는 중입니다...</div>
-    </main>
+    <div id="popupOverlay" class="popup-overlay">
+        <div class="mac-note-popup">
+            <div class="mac-note-header">
+                <div class="mac-note-title">Future Strategy Office | Weekly Scanning Report</div>
+                <button id="closePopup" class="mac-note-close">×</button>
+            </div>
+            <div class="mac-note-body" id="markdownContent">
+                <p>Loading Weekly Scanning Report...</p>
+            </div>
+            <div class="mac-note-footer">
+                &copy; 2026 Future Strategy Office | AI Designer Sangwook Park
+            </div>
+        </div>
+    </div>
 
     <script>
-        // 1. 파일명 확인 (파일명이 2026-03-03.md 인지 2026-03-30.md 인지 확인 필수!)
-        const targetFile = '2026-03-03.md'; 
+        // 3. 자바스크립트 로직 (마크다운 로딩 및 팝업 제어)
         
-        // 2. Fetch API로 파일 가져오기
-        // ./weekly-letter/ 경로가 맞는지 확인하세요.
+        // 팝업 요소 가져오기
+        const popupOverlay = document.getElementById('popupOverlay');
+        const closePopupBtn = document.getElementById('closePopup');
+
+        // 파일명 확인 (2026-03-03.md 일 수도 있습니다.)
+        const targetFile = '2026-03-30.md'; 
+        
+        // 팝업 열기 함수
+        function openPopup() {
+            popupOverlay.classList.add('active');
+            // 팝업 열릴 때 body 스크롤 막기 (선택 사항)
+            document.body.style.overflow = 'hidden';
+        }
+
+        // 팝업 닫기 함수
+        function closePopup() {
+            popupOverlay.classList.add('active'); // active 클래스 제거
+            // 팝업 닫힐 때 body 스크롤 허용 (선택 사항)
+            document.body.style.overflow = '';
+            // 닫힌 후 메인 페이지로 돌아가기 (선택 사항)
+            // window.location.href = 'index.html'; 
+        }
+
+        // 닫기 버튼 클릭 이벤트
+        closePopupBtn.addEventListener('click', closePopup);
+
+        // 마스크(어두운 배경) 클릭 시 팝업 닫기 (선택 사항)
+        popupOverlay.addEventListener('click', (event) => {
+            if (event.target === popupOverlay) {
+                closePopup();
+            }
+        });
+
+        // ESC 키 누를 때 팝업 닫기 (선택 사항)
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && popupOverlay.classList.contains('active')) {
+                closePopup();
+            }
+        });
+
+        // 4. Fetch API로 마크다운 파일 가져오기 및 렌더링
         fetch(`./weekly-letter/${targetFile}`)
             .then(response => {
                 if (!response.ok) {
@@ -29,17 +226,22 @@
                 return response.text();
             })
             .then(markdown => {
-                // 로딩 메시지 삭제 후 마크다운 변환 및 삽입
-                const contentArea = document.getElementById('content');
-                contentArea.innerHTML = marked.parse(markdown);
+                // 마크다운 변환 및 삽입
+                const markdownArea = document.getElementById('markdownContent');
+                markdownArea.innerHTML = marked.parse(markdown);
+                
+                // 마크다운 로딩 완료 후 팝업 열기 (애니메이션 효과)
+                setTimeout(openPopup, 500); // 0.5초 후 팝업 열기 (부드러운 효과)
             })
             .catch(error => {
                 console.error('Error:', error);
-                document.getElementById('content').innerHTML = `
-                    <div style="text-align: center; margin-top: 50px;">
+                document.getElementById('markdownContent').innerHTML = `
+                    <div style="text-align: center; margin-top: 50px; color: #000;">
                         <p>리포트를 불러오는 데 실패했습니다.</p>
                         <p style="font-size: 0.8rem; color: #888;">사유: ${error.message}</p>
                     </div>`;
+                // 로딩 실패 시에도 팝업 열기
+                setTimeout(openPopup, 500);
             });
     </script>
 </body>
