@@ -8,77 +8,154 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Rubik+Iso&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700&display=swap" rel="stylesheet">
-  
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="data.js"></script>
 
   <style>
-    /* 1. 글로벌 스타일 */
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body { width: 100%; height: 100%; background: #080808; overflow: hidden; cursor: none; touch-action: pan-y; }
+
+    html, body {
+      width: 100%; height: 100%;
+      background: #080808;
+      overflow: hidden;
+      cursor: none;
+      /* ① pull-to-refresh: overscroll-behavior-y auto 로 허용 */
+      overscroll-behavior-y: auto;
+      touch-action: pan-y;
+    }
 
     #glcanvas { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; }
-    
-    /* [완벽 복구] PC에서는 팝업 위에서도 무조건 보이는 커서 */
-    #cursor { 
-      position: fixed; width: 12px; height: 12px; background: #fff; border-radius: 50%; 
-      transform: translate(-50%, -50%); pointer-events: none; z-index: 999999; 
+
+    /* ── PC 커서 (항상 최상단) ── */
+    #cursor {
+      position: fixed; width: 12px; height: 12px; background: #fff; border-radius: 50%;
+      transform: translate(-50%, -50%); pointer-events: none; z-index: 999999;
       mix-blend-mode: difference; display: block;
     }
 
-    /* [완벽 복구] 모바일(터치 기기)에서만 깔끔하게 커서 제거 */
+    /* ② 모바일(터치기기)에서만 커서 완전 제거 */
     @media (hover: none) and (pointer: coarse) {
       #cursor { display: none !important; }
       html, body { cursor: auto; }
+      /* 팝업 내부도 모바일에선 기본 커서 */
+      .mac-note-popup, .mac-note-body, .mac-note-close { cursor: auto !important; }
     }
 
-    /* 2. 메인 UI (원래 작성하셨던 CSS 그대로 복구) */
-    #header { 
-      position: fixed; top: 2.5rem; left: 50%; transform: translateX(-50%); 
-      display: flex; flex-direction: column; align-items: center; gap: 0.3rem; 
-      z-index: 3; opacity: 0; animation: fadeIn .8s .3s forwards; text-align: center; width: 100%; 
+    /* ── 헤더 ── */
+    #header {
+      position: fixed; top: 2.5rem; left: 50%; transform: translateX(-50%);
+      display: flex; flex-direction: column; align-items: center; gap: 0.3rem;
+      z-index: 3; opacity: 0; animation: fadeIn .8s .3s forwards;
+      text-align: center; width: 100%;
     }
-    
-    #datetime, #credit { 
-      color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.8), 0 2px 4px rgba(0,0,0,0.9), 0 4px 8px rgba(0,0,0,1);
-      white-space: nowrap; font-family: 'Archivo', sans-serif; 
-      display: inline-block; 
-      transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); /* 쫀득하게 돌아오는 원래 설정 */
-      pointer-events: none; 
+    #datetime, #credit {
+      color: #fff;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.8), 0 2px 4px rgba(0,0,0,0.9), 0 4px 8px rgba(0,0,0,1);
+      white-space: nowrap; font-family: 'Archivo', sans-serif;
+      display: inline-block;
+      transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+      pointer-events: none;
     }
     #datetime { font-size: 14px; font-weight: 700; letter-spacing: -0.02em; }
-    #credit { font-size: 11px; font-weight: 500; letter-spacing: -0.01em; opacity: 0.6; }
+    #credit   { font-size: 11px; font-weight: 500; letter-spacing: -0.01em; opacity: 0.6; }
 
-    #footer { position: fixed; bottom: 4rem; left: 0; right: 0; display: flex; flex-direction: column; align-items: center; gap: 1.5rem; z-index: 3; opacity: 0; animation: fadeIn .8s .6s forwards; }
-    
-    /* 버튼 기울기, 효과 복구 (Rubik Iso 폰트 유지) */
+    /* ── 푸터 버튼 ── */
+    #footer {
+      position: fixed; bottom: 4rem; left: 0; right: 0;
+      display: flex; flex-direction: column; align-items: center; gap: 1.5rem;
+      z-index: 3; opacity: 0; animation: fadeIn .8s .6s forwards;
+    }
     .btn { text-decoration: none; cursor: none; transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); width: 100%; text-align: center; }
     .btn span { display: inline-block; font-family: 'Rubik Iso', system-ui; font-size: 8.5vw; letter-spacing: -0.06em; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.8), 0 4px 8px rgba(0,0,0,0.9), 0 8px 16px rgba(0,0,0,1); transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
-    
-    .btn-primary { transform: rotate(-4deg); }
-    .btn-primary:hover span { opacity: 0.6; transform: scale(1.1) rotate(-6deg); filter: blur(12px) brightness(2.5); text-shadow: 0 0 25px #fff; }
+    .btn-primary   { transform: rotate(-4deg); }
+    .btn-primary:hover span   { opacity: 0.6; transform: scale(1.1) rotate(-6deg); filter: blur(12px) brightness(2.5); text-shadow: 0 0 25px #fff; }
     .btn-secondary { transform: rotate(5deg); }
     .btn-secondary:hover span { opacity: 0.5; transform: scale(1.1) rotate(8deg); filter: blur(10px) brightness(0); text-shadow: none; }
 
-    @media (min-width: 768px) { #datetime { font-size: 21px; } #credit { font-size: 16px; } #footer { gap: 3rem; bottom: 6rem; } .btn span { font-size: 52px; } }
+    @media (min-width: 768px) {
+      #datetime { font-size: 21px; }
+      #credit   { font-size: 16px; }
+      #footer   { gap: 3rem; bottom: 6rem; }
+      .btn span { font-size: 52px; }
+    }
+
     @keyframes fadeIn { to { opacity: 1; } }
 
-    /* 3. 클래식 맥 팝업 */
-    .popup-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(5px); z-index: 10000; display: flex; justify-content: center; align-items: center; opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 0.4s ease; }
+    /* ── 팝업 오버레이 ── */
+    .popup-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
+      z-index: 10000; display: flex; justify-content: center; align-items: center;
+      opacity: 0; visibility: hidden; pointer-events: none;
+      transition: opacity 0.4s ease;
+    }
     .popup-overlay.active { opacity: 1; visibility: visible; pointer-events: auto; }
 
-    .mac-note-popup { background: #fff; border: 3px solid #000; width: 92%; max-width: 750px; height: 82vh; display: flex; flex-direction: column; box-shadow: 10px 10px 0px #000; transform: translateY(110%); transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1); cursor: none; }
+    /* ── 맥 팝업 창 ── */
+    .mac-note-popup {
+      background: #fff; border: 3px solid #000;
+      width: 92%; max-width: 750px; height: 82vh;
+      display: flex; flex-direction: column;
+      box-shadow: 10px 10px 0px #000;
+      transform: translateY(110%);
+      transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      cursor: none;
+    }
     .popup-overlay.active .mac-note-popup { transform: translateY(0); }
 
-    .mac-note-header { background: #fff; border-bottom: 3px solid #000; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; }
-    .mac-note-title { color: #000; font-family: 'Courier New', Courier, monospace; font-weight: bold; font-size: 11px; }
+    .mac-note-header {
+      background: #fff; border-bottom: 3px solid #000;
+      padding: 10px 15px; display: flex; justify-content: space-between; align-items: center;
+    }
+    .mac-note-title { color: #000; font-family: 'Courier New', monospace; font-weight: bold; font-size: 11px; }
     .mac-note-close { background: none; border: 2px solid #000; cursor: none; font-weight: bold; width: 28px; height: 28px; }
     .mac-note-close:hover { background: #000; color: #fff; }
 
-    .mac-note-body { flex: 1; overflow-y: auto; padding: 25px; color: #000; text-align: left; line-height: 1.6; font-family: 'Courier New', Courier, monospace; -webkit-overflow-scrolling: touch; cursor: none; }
+    /* ── ③ 클래식 맥 스크롤바 ── */
+    .mac-note-body {
+      flex: 1; overflow-y: auto; padding: 25px;
+      color: #000; text-align: left; line-height: 1.6;
+      font-family: 'Courier New', monospace;
+      -webkit-overflow-scrolling: touch;
+      cursor: none;
+      scrollbar-width: thin;
+      scrollbar-color: #000 #e0e0e0;
+    }
+    /* 웹킷(크롬/사파리) 맥 스크롤바 */
+    .mac-note-body::-webkit-scrollbar { width: 16px; }
+    .mac-note-body::-webkit-scrollbar-track {
+      background: #e8e8e8;
+      border-left: 2px solid #000;
+    }
+    .mac-note-body::-webkit-scrollbar-thumb {
+      background: #fff;
+      border: 2px solid #000;
+      box-shadow: inset 1px 1px 0 #fff, inset -1px -1px 0 #888;
+    }
+    .mac-note-body::-webkit-scrollbar-thumb:hover {
+      background: #ccc;
+    }
+    .mac-note-body::-webkit-scrollbar-button {
+      background: #e8e8e8;
+      border: 2px solid #000;
+      height: 16px;
+      display: block;
+    }
+    /* 위 화살표 */
+    .mac-note-body::-webkit-scrollbar-button:single-button:vertical:decrement {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='6'%3E%3Cpolygon points='4,0 8,6 0,6' fill='%23000'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: center;
+    }
+    /* 아래 화살표 */
+    .mac-note-body::-webkit-scrollbar-button:single-button:vertical:increment {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='6'%3E%3Cpolygon points='0,0 8,0 4,6' fill='%23000'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: center;
+    }
+
     @media (min-width: 768px) { .mac-note-body { padding: 45px; } }
 
-    /* 불렛 포인트 여백 및 마크다운 스타일 유지 */
     .mac-note-body ul, .mac-note-body ol { margin-left: 25px !important; margin-bottom: 15px; padding-left: 5px; }
     .mac-note-body li { font-size: 13.5px; margin-bottom: 8px; list-style-position: outside; }
     .mac-note-body h1 { font-size: 1.2rem; background: #000; color: #fff; padding: 8px; margin-bottom: 20px; display: inline-block; border: 2px solid #000; }
@@ -87,7 +164,7 @@
     .mac-note-body th, .mac-note-body td { border: 1px solid #000; padding: 8px 6px; text-align: left; }
     .mac-note-body th { background: #eee; }
 
-    .mac-note-footer { padding: 10px 15px; background: #fff; border-top: 1px solid #ddd; font-size: 9px; color: #000; text-align: right; font-family: 'Courier New', Courier, monospace; font-weight: bold; }
+    .mac-note-footer { padding: 10px 15px; background: #fff; border-top: 1px solid #ddd; font-size: 9px; color: #000; text-align: right; font-family: 'Courier New', monospace; font-weight: bold; }
   </style>
 </head>
 <body>
@@ -121,38 +198,33 @@
 <script>
   let mx = window.innerWidth/2, my = window.innerHeight/2, smx = mx, smy = my;
   const cursorEl = document.getElementById('cursor');
-  
-  document.addEventListener('mousemove', e => { 
-    mx = e.clientX; my = e.clientY; 
+
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
     if (cursorEl) { cursorEl.style.left = mx+'px'; cursorEl.style.top = my+'px'; }
   });
-  
+
   const dtEl = document.getElementById('datetime');
-  function updateTime() { const now = new Date(); dtEl.textContent = now.toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' }) + ' — ' + now.toLocaleTimeString('en-US', { hour12:false }); }
+  function updateTime() {
+    const now = new Date();
+    dtEl.textContent = now.toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' }) + ' — ' + now.toLocaleTimeString('en-US', { hour12: false });
+  }
   setInterval(updateTime, 1000); updateTime();
 
-  /* ── 상단 텍스트 "확!" 도망가기 효과 (상욱 님 오리지널 코드 100% 이식) ── */
+  /* ── 헤더 도망가기 ── */
   const headerItems = [dtEl, document.getElementById('credit')];
   function updateHeaderRepulsion() {
     headerItems.forEach(item => {
       const rect = item.getBoundingClientRect();
       const itemX = rect.left + rect.width / 2;
       const itemY = rect.top + rect.height / 2;
-      
-      const dx = mx - itemX;
-      const dy = my - itemY;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      
-      const radius = 250; // 더 넓은 범위에서 감지
+      const dx = mx - itemX, dy = my - itemY;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+      const radius = 250;
       if (dist < radius) {
-        // 거리가 가까울수록 기하급수적으로 힘이 강해짐
-        let force = (radius - dist) / radius;
-        force = Math.pow(force, 1.5); // 가속도 추가
-        
-        // 최대 120px까지 확! 밀려나게 설정
+        let force = Math.pow((radius - dist) / radius, 1.5);
         const moveX = -(dx * force * 120) / dist;
         const moveY = -(dy * force * 80) / dist;
-        
         item.style.transform = `translate(${moveX}px, ${moveY}px) scale(${1 - force * 0.2})`;
       } else {
         item.style.transform = `translate(0px, 0px) scale(1)`;
@@ -160,54 +232,88 @@
     });
   }
 
+  /* ── WebGL ── */
   const canvas = document.getElementById('glcanvas');
   const gl = canvas.getContext('webgl');
   const vsSource = `attribute vec2 a_pos; varying vec2 v_uv; void main() { v_uv = a_pos * 0.5 + 0.5; gl_Position = vec4(a_pos, 0.0, 1.0); }`;
   const fsSource = `precision mediump float; uniform sampler2D u_tex; uniform vec2 u_res; uniform vec2 u_imgRes; uniform vec2 u_mouse; uniform float u_time; varying vec2 v_uv; void main() { vec2 s = u_res; vec2 i = u_imgRes; float rs = s.x / s.y; float ri = i.x / i.y; vec2 newUv = rs < ri ? vec2(i.x * s.y / i.y, s.y) : vec2(s.x, i.y * s.x / i.x); vec2 offset = (newUv - s) / 2.0 / newUv; vec2 uv = v_uv * (s / newUv) + offset; uv.y = 1.0 - uv.y; float dist = distance(v_uv, vec2(u_mouse.x/u_res.x, 1.0 - u_mouse.y/u_res.y)); float ripple = sin(dist * 25.0 - u_time * 5.0) * exp(-dist * 6.0) * 0.015; vec2 dir = normalize(v_uv - vec2(u_mouse.x/u_res.x, 1.0 - u_mouse.y/u_res.y) + 0.0001); uv += dir * ripple; vec4 col = texture2D(u_tex, uv); gl_FragColor = vec4(col.rgb + vec3(abs(ripple) * 10.0 * exp(-dist * 8.0)), col.a); }`;
+
   function createShader(gl, type, src) { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); return s; }
-  const prog = gl.createProgram(); gl.attachShader(prog, createShader(gl, gl.VERTEX_SHADER, vsSource)); gl.attachShader(prog, createShader(gl, gl.FRAGMENT_SHADER, fsSource)); gl.linkProgram(prog); gl.useProgram(prog);
-  const vertices = new Float32Array([-1,-1, 1,-1, -1,1, 1,1]); gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer()); gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
-  const aPos = gl.getAttribLocation(prog, 'a_pos'); gl.enableVertexAttribArray(aPos); gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
-  const uRes = gl.getUniformLocation(prog, 'u_res'), uImgRes = gl.getUniformLocation(prog, 'u_imgRes'), uMouse = gl.getUniformLocation(prog, 'u_mouse'), uTime = gl.getUniformLocation(prog, 'u_time');
+  const prog = gl.createProgram();
+  gl.attachShader(prog, createShader(gl, gl.VERTEX_SHADER, vsSource));
+  gl.attachShader(prog, createShader(gl, gl.FRAGMENT_SHADER, fsSource));
+  gl.linkProgram(prog); gl.useProgram(prog);
+
+  const vertices = new Float32Array([-1,-1, 1,-1, -1,1, 1,1]);
+  gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+  gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+  const aPos = gl.getAttribLocation(prog, 'a_pos');
+  gl.enableVertexAttribArray(aPos);
+  gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+
+  const uRes = gl.getUniformLocation(prog, 'u_res');
+  const uImgRes = gl.getUniformLocation(prog, 'u_imgRes');
+  const uMouse = gl.getUniformLocation(prog, 'u_mouse');
+  const uTime = gl.getUniformLocation(prog, 'u_time');
   let imgRes = [1, 1];
-  const tex = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, tex); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([10,10,10,255]));
-  function loadBg() { if (typeof IMAGES === 'undefined' || !IMAGES.length) return; const img = new Image(); img.crossOrigin = "anonymous"; img.onload = () => { imgRes = [img.width, img.height]; gl.bindTexture(gl.TEXTURE_2D, tex); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR); }; img.src = IMAGES[Math.floor(Math.random() * IMAGES.length)]; }
+
+  const tex = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, tex);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([10,10,10,255]));
+
+  function loadBg() {
+    if (typeof IMAGES === 'undefined' || !IMAGES.length) return;
+    const img = new Image(); img.crossOrigin = "anonymous";
+    img.onload = () => {
+      imgRes = [img.width, img.height];
+      gl.bindTexture(gl.TEXTURE_2D, tex);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    };
+    img.src = IMAGES[Math.floor(Math.random() * IMAGES.length)];
+  }
   loadBg();
 
+  /* ── 팝업 ── */
   const weeklyBtn = document.getElementById('weeklyBtn');
-  const popup = document.getElementById('weeklyPopup');
-  const closeBtn = document.getElementById('closePopup');
-  const content = document.getElementById('markdownContent');
+  const popup     = document.getElementById('weeklyPopup');
+  const closeBtn  = document.getElementById('closePopup');
+  const content   = document.getElementById('markdownContent');
 
-  weeklyBtn.addEventListener('click', (e) => {
+  weeklyBtn.addEventListener('click', e => {
     e.preventDefault();
     fetch('weekly-letter/2026-03-30.md')
       .then(res => { if (!res.ok) throw new Error(); return res.text(); })
       .then(data => {
         content.innerHTML = (typeof marked !== 'undefined') ? marked.parse(data) : data;
         popup.classList.add('active');
-        // PC 커서 숨기는 로직 완전 삭제 (무조건 보임)
       })
-      .catch(err => {
-        content.innerHTML = `<div style="color:red; font-size:11px; padding:20px;">[ERROR]: 데이터 로드 실패</div>`;
+      .catch(() => {
+        content.innerHTML = `<div style="color:red;font-size:11px;padding:20px;">[ERROR]: 데이터 로드 실패</div>`;
         popup.classList.add('active');
       });
   });
 
-  closeBtn.addEventListener('click', () => { 
-    popup.classList.remove('active'); 
+  closeBtn.addEventListener('click', () => { popup.classList.remove('active'); });
+
+  /* ── 팝업 바깥 클릭시 닫기 ── */
+  popup.addEventListener('click', e => {
+    if (e.target === popup) popup.classList.remove('active');
   });
 
+  /* ── 렌더 루프 ── */
   function render(t) {
     canvas.width = window.innerWidth; canvas.height = window.innerHeight;
     gl.viewport(0, 0, canvas.width, canvas.height);
     smx += (mx - smx) * 0.1; smy += (my - smy) * 0.1;
-    gl.uniform2f(uRes, canvas.width, canvas.height); gl.uniform2f(uImgRes, imgRes[0], imgRes[1]); gl.uniform2f(uMouse, smx, smy); gl.uniform1f(uTime, t * 0.001);
-    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); 
-    
-    // 오리지널 도망가기 효과 호출
-    updateHeaderRepulsion(); 
-    
+    gl.uniform2f(uRes, canvas.width, canvas.height);
+    gl.uniform2f(uImgRes, imgRes[0], imgRes[1]);
+    gl.uniform2f(uMouse, smx, smy);
+    gl.uniform1f(uTime, t * 0.001);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    updateHeaderRepulsion();
     requestAnimationFrame(render);
   }
   requestAnimationFrame(render);
