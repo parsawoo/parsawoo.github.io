@@ -13,48 +13,48 @@
   <script src="data.js"></script>
 
   <style>
-    /* 1. 글로벌 스타일: 새로고침 방해 요소 제거 */
+    /* 1. 글로벌 & 레이아웃 */
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-    
-    /* [수정] 메인에서는 스크롤 방지하되, 터치 액션은 살려둠 */
-    html, body { 
-      width: 100%; height: 100%; 
-      background: #080808; 
-      overflow: hidden; 
-      cursor: none;
-      touch-action: pan-y; /* 세로 방향 터치 동작(새로고침 포함) 허용 */
-    }
+    html, body { width: 100%; height: 100%; background: #080808; overflow: hidden; cursor: none; touch-action: pan-y; }
 
     #glcanvas { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; }
     
-    /* PC 커서 볼: 항상 유지 */
+    /* [복구] PC 커서 볼 스타일 */
     #cursor { 
       position: fixed; width: 12px; height: 12px; background: #fff; border-radius: 50%; 
       transform: translate(-50%, -50%); pointer-events: none; z-index: 99999; 
-      mix-blend-mode: difference; display: block;
+      mix-blend-mode: difference; transition: opacity 0.3s ease;
     }
 
-    /* 모바일에서만 커서 숨김 (새로고침과 충돌 없도록 단순 숨김만) */
+    /* 모바일에서만 커서 숨김 */
     @media (hover: none) and (pointer: coarse) {
       #cursor { display: none !important; }
       html, body { cursor: auto; }
     }
 
-    /* 2. 메인 UI */
+    /* 2. 메인 UI 디자인 (복구 완료) */
     #header { position: fixed; top: 2rem; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 0.3rem; z-index: 3; opacity: 0; animation: fadeIn .8s .3s forwards; text-align: center; width: 100%; }
-    #datetime { color: #fff; font-family: 'Archivo', sans-serif; font-size: 13px; font-weight: 700; pointer-events: none; }
+    #datetime { color: #fff; font-family: 'Archivo', sans-serif; font-size: 13px; font-weight: 700; pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
     #credit { color: #fff; font-family: 'Archivo', sans-serif; font-size: 10px; opacity: 0.6; pointer-events: none; }
 
     #footer { position: fixed; bottom: 3.5rem; left: 0; right: 0; display: flex; flex-direction: column; align-items: center; gap: 1.2rem; z-index: 3; opacity: 0; animation: fadeIn .8s .6s forwards; }
-    .btn { text-decoration: none; cursor: none; width: 100%; text-align: center; }
-    .btn span { display: inline-block; font-family: 'Rubik Iso', system-ui; font-size: 8.5vw; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
+    
+    /* [복구] 삐딱한 버튼 및 호버 효과 */
+    .btn { text-decoration: none; cursor: none; transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); width: 100%; text-align: center; }
+    .btn span { display: inline-block; font-family: 'Rubik Iso', system-ui; font-size: 8.5vw; letter-spacing: -0.06em; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.8); transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+    
+    .btn-primary { transform: rotate(-4deg); }
+    .btn-primary:hover span { opacity: 0.6; transform: scale(1.1) rotate(-6deg); filter: blur(12px) brightness(2.5); text-shadow: 0 0 25px #fff; }
+    
+    .btn-secondary { transform: rotate(5deg); }
+    .btn-secondary:hover span { opacity: 0.5; transform: scale(1.1) rotate(8deg); filter: blur(10px) brightness(0); }
 
     @media (min-width: 768px) { 
       #datetime { font-size: 21px; } #credit { font-size: 16px; } #footer { gap: 3rem; bottom: 6rem; } .btn span { font-size: 52px; }
     }
     @keyframes fadeIn { to { opacity: 1; } }
 
-    /* 3. 클래식 맥 팝업 스타일 */
+    /* 3. 클래식 맥 팝업 (여백 및 디자인) */
     .popup-overlay {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(5px);
@@ -75,20 +75,18 @@
     .mac-note-header { background: #fff; border-bottom: 3px solid #000; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; }
     .mac-note-title { color: #000; font-family: 'Courier New', Courier, monospace; font-weight: bold; font-size: 11px; }
     .mac-note-close { background: none; border: 2px solid #000; cursor: none; font-weight: bold; width: 28px; height: 28px; }
+    .mac-note-close:hover { background: #000; color: #fff; }
 
-    /* 여백 및 리스트 교정 */
     .mac-note-body {
       flex: 1; overflow-y: auto; padding: 25px; 
       color: #000; text-align: left; line-height: 1.6; font-family: 'Courier New', Courier, monospace;
-      -webkit-overflow-scrolling: touch; /* 모바일 스크롤 부드럽게 */
+      -webkit-overflow-scrolling: touch;
     }
     @media (min-width: 768px) { .mac-note-body { padding: 45px; } }
 
-    /* 리스트 스타일 복구 */
+    /* 리스트 스타일 교정 */
     .mac-note-body ul, .mac-note-body ol { margin-left: 25px !important; margin-bottom: 15px; padding-left: 5px; }
     .mac-note-body li { font-size: 13.5px; margin-bottom: 8px; list-style-position: outside; }
-    .mac-note-body p { font-size: 13.5px; margin-bottom: 12px; word-break: keep-all; }
-
     .mac-note-body h1 { font-size: 1.2rem; background: #000; color: #fff; padding: 8px; margin-bottom: 20px; display: inline-block; border: 2px solid #000; }
     .mac-note-body h2 { font-size: 1.1rem; margin-top: 25px; border-bottom: 2.5px solid #000; padding-bottom: 5px; margin-bottom: 15px; }
     
@@ -130,7 +128,10 @@
 <script>
   let mx = window.innerWidth/2, my = window.innerHeight/2, smx = mx, smy = my;
   const cursorEl = document.getElementById('cursor');
-  document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; if (cursorEl) { cursorEl.style.left = mx+'px'; cursorEl.style.top = my+'px'; } });
+  document.addEventListener('mousemove', e => { 
+    mx = e.clientX; my = e.clientY; 
+    if (cursorEl) { cursorEl.style.left = mx+'px'; cursorEl.style.top = my+'px'; }
+  });
   
   const dtEl = document.getElementById('datetime');
   function updateTime() { const now = new Date(); dtEl.textContent = now.toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' }) + ' — ' + now.toLocaleTimeString('en-US', { hour12:false }); }
@@ -157,24 +158,18 @@
 
   weeklyBtn.addEventListener('click', (e) => {
     e.preventDefault();
-    const filePath = 'weekly-letter/2026-03-30.md'; 
-    fetch(filePath)
-      .then(res => { if (!res.ok) throw new Error(`NOT FOUND: ${filePath}`); return res.text(); })
+    fetch('weekly-letter/2026-03-30.md')
+      .then(res => { if (!res.ok) throw new Error(); return res.text(); })
       .then(data => {
         content.innerHTML = (typeof marked !== 'undefined') ? marked.parse(data) : data;
         popup.classList.add('active');
-        // 팝업 시 스크롤 방해 금지
-        document.body.style.overflow = 'hidden';
-      })
-      .catch(err => {
-        content.innerHTML = `<div style="color:red; font-size:11px; padding:20px;">[ERROR]: ${err.message}</div>`;
-        popup.classList.add('active');
+        if (window.innerWidth >= 768) cursorEl.style.opacity = '0'; // PC만 팝업 시 커서 투명화
       });
   });
 
   closeBtn.addEventListener('click', () => { 
     popup.classList.remove('active');
-    document.body.style.overflow = 'hidden'; // 팝업 닫히면 다시 메인 고정
+    if (window.innerWidth >= 768) cursorEl.style.opacity = '1';
   });
 
   function render(t) {
