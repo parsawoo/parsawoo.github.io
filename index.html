@@ -284,7 +284,7 @@
 
   weeklyBtn.addEventListener('click', e => {
     e.preventDefault();
-    fetch('weekly-letter/2026-03-30.md')
+    fetch('weekly-letter/2026-03-31.md')
       .then(res => { if (!res.ok) throw new Error(); return res.text(); })
       .then(data => {
         content.innerHTML = (typeof marked !== 'undefined') ? marked.parse(data) : data;
