@@ -53,7 +53,16 @@ const IMAGES = [
   'images/img52.jpg',
   'images/img53.jpg',
   'images/img54.jpg',
-  'images/img55.jpg'
+  'images/img56.jpg',
+  'images/img57.jpg',
+  'images/img58.jpg',
+  'images/img59.jpg',
+  'images/img60.jpg',
+  'images/img61.jpg',
+  'images/img62.jpg',
+  'images/img63.jpg',
+  'images/img64.jpg',
+  'images/img65.jpg',
 ];
 
 // ─── Hourly Report: 매시간 랜덤으로 뽑히는 인사이트 ──────────
